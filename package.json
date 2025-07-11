@@ -1,0 +1,47 @@
+{
+  "name": "pipe-data-convert",
+  "version": "1.0.0",
+  "description": "A comprehensive JavaScript library for pipe-related unit and data conversions.",
+  "main": "dist/pipeDataConvert.js",
+  "module": "dist/pipeDataConvert.js",
+  "scripts": {
+    "build": "echo 'No complex build needed, ensure src/pipeDataConvert.js is copied to dist/pipeDataConvert.js'",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rajasekar-arch/pipe-data-convert.git"
+  },
+  "keywords": [
+    "pipe-data-convert",
+    "converter",
+    "unit conversion",
+    "data conversion",
+    "javascript",
+    "npm",
+    "string",
+    "boolean",
+    "Pipe conversion",
+    "react js",
+    "react",
+    "reactjs",
+    "angular",
+    "ts pipe converter"
+  ],
+  "author": "RAJASEKAR E C <rajasekar_e_c@outlook.com>",
+  "license": "MIT",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rajasekar-arch/pipe-data-convert/issues"
+  },
+  "homepage": "https://github.com/rajasekar-arch/pipe-data-convert#readme",
+  "files": [
+    "dist/",
+    "README.md",
+    "package.json"
+  ],
+  "devDependencies": {
+    "cpx": "^1.5.0",
+    "rimraf": "^6.0.1"
+  }
+}

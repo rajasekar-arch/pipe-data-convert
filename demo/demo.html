@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipe Converter Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 800px;
+        }
+        .input-group label {
+            font-weight: 500;
+            color: #333;
+        }
+        .input-field {
+            border-radius: 0.5rem; /* rounded-lg */
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            padding: 0.75rem 1rem; /* py-3 px-4 */
+            font-size: 1rem; /* text-base */
+            width: 100%;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+        }
+        .btn {
+            padding: 0.75rem 1.5rem; /* py-3 px-6 */
+            font-weight: 600; /* font-semibold */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+        }
+        .btn-primary:hover {
+            background-color: #4338ca; /* indigo-700 */
+            transform: translateY(-1px);
+        }
+        .result-box {
+            background-color: #e0f2fe; /* light blue for results */
+            border: 1px solid #90cdf4; /* blue-300 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600;
+            color: #2c5282; /* blue-800 */
+        }
+        .error-message {
+            color: #ef4444; /* red-500 */
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="container bg-white p-8 rounded-xl shadow-lg space-y-6">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Pipe Unit Converter</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="input-group">
+                <label for="categorySelect" class="block text-gray-700 text-sm mb-2">Select Category:</label>
+                <select id="categorySelect" class="input-field focus:ring-indigo-500 focus:border-indigo-500">
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="valueInput" class="block text-gray-700 text-sm mb-2">Value to Convert:</label>
+                <input type="number" id="valueInput" class="input-field focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter value" value="10">
+            </div>
+
+            <div class="input-group">
+                <label for="fromUnitSelect" class="block text-gray-700 text-sm mb-2">From Unit:</label>
+                <select id="fromUnitSelect" class="input-field focus:ring-indigo-500 focus:border-indigo-500">
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="toUnitSelect" class="block text-gray-700 text-sm mb-2">To Unit:</label>
+                <select id="toUnitSelect" class="input-field focus:ring-indigo-500 focus:border-indigo-500">
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+            </div>
+        </div>
+
+        <button id="convertButton" class="btn btn-primary w-full mt-6">Convert</button>
+
+        <div id="resultContainer" class="result-box text-center mt-6 hidden">
+            <p id="resultText"></p>
+        </div>
+        <div id="errorMessage" class="error-message text-center mt-4 hidden"></div>
+    </div>
+
+    <script type="module">
+        // In a real npm package setup, you would import like this:
+        // import PipeDataConvert from './node_modules/pipe-converter-package/dist/PipeDataConvert.js';
+        // For this demo, we'll define the class directly or assume it's globally available.
+
+        // --- Start of PipeDataConvert Class Definition (for direct HTML use) ---
+        // In a real scenario, you'd import this from your npm package.
+        class PipeDataConvert {
+            constructor() {
+                this.conversionFactors = {
+                    length: {
+                        'mm': 0.001, 'cm': 0.01, 'm': 1, 'km': 1000,
+                        'inch': 0.0254, 'ft': 0.3048, 'yd': 0.9144, 'mile': 1609.34,
+                    },
+                    area: {
+                        'sq_mm': 1e-6, 'sq_cm': 1e-4, 'sq_m': 1, 'sq_km': 1e6,
+                        'sq_inch': 0.00064516, 'sq_ft': 0.092903, 'acre': 4046.86, 'hectare': 10000,
+                    },
+                    volume: {
+                        'ml': 1e-6, 'liter': 0.001, 'cubic_cm': 1e-6, 'cubic_m': 1,
+                        'cubic_inch': 1.63871e-5, 'cubic_ft': 0.0283168, 'us_gallon': 0.00378541,
+                        'uk_gallon': 0.00454609, 'barrel': 0.158987,
+                    },
+                    flow_rate: {
+                        'lps': 0.001, 'lpm': 0.001 / 60, 'lmh': 0.001 / 3600,
+                        'cubic_mps': 1, 'cubic_mph': 1 / 3600,
+                        'us_gpm': 0.00378541 / 60, 'uk_gpm': 0.00454609 / 60,
+                        'cfm': 0.0283168 / 60, 'bpd': 0.158987 / (24 * 3600),
+                    },
+                    pressure: {
+                        'pa': 1, 'kpa': 1000, 'mpa': 1e6, 'bar': 100000, 'psi': 6894.76,
+                        'atm': 101325, 'kgf_per_sq_cm': 98066.5, 'mmHg': 133.322,
+                        'inHg': 3386.39, 'water_meter': 9806.65, 'water_ft': 2989.06,
+                    },
+                    temperature: {
+                        'celsius': (value, toBase = true) => toBase ? value + 273.15 : value - 273.15,
+                        'fahrenheit': (value, toBase = true) => toBase ? (value - 32) * 5/9 + 273.15 : (value - 273.15) * 9/5 + 32,
+                        'kelvin': (value, toBase = true) => value,
+                        'rankine': (value, toBase = true) => toBase ? value * 5/9 : value * 9/5,
+                    },
+                    mass: {
+                        'mg': 1e-6, 'g': 0.001, 'kg': 1, 'tonne': 1000,
+                        'lb': 0.453592, 'oz': 0.0283495, 'us_ton': 907.185, 'uk_ton': 1016.05,
+                    },
+                    velocity: {
+                        'mps': 1, 'kmph': 1 / 3.6, 'fps': 0.3048, 'mph': 0.44704, 'knot': 0.514444,
+                    },
+                    power: {
+                        'watt': 1, 'kw': 1000, 'hp': 745.7, 'btu_per_hr': 0.293071, 'ft_lb_per_s': 1.35582,
+                    },
+                    density: {
+                        'kg_per_cubic_m': 1, 'g_per_cubic_cm': 1000,
+                        'lb_per_cubic_ft': 16.0185, 'lb_per_cubic_inch': 27679.9,
+                    }
+                };
+            }
+
+            convert(category, value, fromUnit, toUnit) {
+                if (!this.conversionFactors[category]) {
+                    console.error(`Error: Unknown conversion category '${category}'.`);
+                    return null;
+                }
+
+                const categoryUnits = this.conversionFactors[category];
+
+                if (!categoryUnits[fromUnit]) {
+                    console.error(`Error: Unknown 'from' unit '${fromUnit}' for category '${category}'.`);
+                    return null;
+                }
+                if (!categoryUnits[toUnit]) {
+                    console.error(`Error: Unknown 'to' unit '${toUnit}' for category '${category}'.`);
+                    return null;
+                }
+
+                let valueInBaseUnit;
+
+                if (category === 'temperature') {
+                    valueInBaseUnit = categoryUnits[fromUnit](value, true);
+                    return categoryUnits[toUnit](valueInBaseUnit, false);
+                }
+
+                valueInBaseUnit = value * categoryUnits[fromUnit];
+                const convertedValue = valueInBaseUnit / categoryUnits[toUnit];
+
+                return convertedValue;
+            }
+
+            getAvailableCategories() {
+                return Object.keys(this.conversionFactors);
+            }
+
+            getUnitsForCategory(category) {
+                if (this.conversionFactors[category]) {
+                    if (category === 'temperature') {
+                        return Object.keys(this.conversionFactors[category]).filter(unit => !unit.endsWith('_inv'));
+                    }
+                    return Object.keys(this.conversionFactors[category]);
+                }
+                return null;
+            }
+        }
+        // --- End of PipeDataConvert Class Definition ---
+
+
+        const pipeConverter = new PipeDataConvert();
+
+        const categorySelect = document.getElementById('categorySelect');
+        const valueInput = document.getElementById('valueInput');
+        const fromUnitSelect = document.getElementById('fromUnitSelect');
+        const toUnitSelect = document.getElementById('toUnitSelect');
+        const convertButton = document.getElementById('convertButton');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultText = document.getElementById('resultText');
+        const errorMessage = document.getElementById('errorMessage');
+
+        /**
+         * Populates the category dropdown with available conversion categories.
+         */
+        function populateCategories() {
+            const categories = pipeConverter.getAvailableCategories();
+            categorySelect.innerHTML = categories.map(cat => `<option value="${cat}">${cat.replace(/_/g, ' ').toUpperCase()}</option>`).join('');
+            populateUnits(); // Populate units for the initially selected category
+        }
+
+        /**
+         * Populates the 'from' and 'to' unit dropdowns based on the selected category.
+         */
+        function populateUnits() {
+            const selectedCategory = categorySelect.value;
+            const units = pipeConverter.getUnitsForCategory(selectedCategory);
+
+            if (units) {
+                const unitOptions = units.map(unit => `<option value="${unit}">${unit.replace(/_/g, ' ')}</option>`).join('');
+                fromUnitSelect.innerHTML = unitOptions;
+                toUnitSelect.innerHTML = unitOptions;
+            } else {
+                fromUnitSelect.innerHTML = '<option value="">No Units</option>';
+                toUnitSelect.innerHTML = '<option value="">No Units</option>';
+            }
+            hideMessage(); // Clear any previous messages
+        }
+
+        /**
+         * Displays a message in the result container.
+         * @param {string} message - The message to display.
+         * @param {boolean} isError - True if it's an error message, false for success.
+         */
+        function showMessage(message, isError = false) {
+            resultContainer.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+
+            if (isError) {
+                errorMessage.textContent = message;
+                errorMessage.classList.remove('hidden');
+            } else {
+                resultText.textContent = message;
+                resultContainer.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * Hides any displayed messages.
+         */
+        function hideMessage() {
+            resultContainer.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+        }
+
+        /**
+         * Handles the conversion process when the button is clicked.
+         */
+        function handleConvert() {
+            hideMessage(); // Clear previous messages
+
+            const category = categorySelect.value;
+            const value = parseFloat(valueInput.value);
+            const fromUnit = fromUnitSelect.value;
+            const toUnit = toUnitSelect.value;
+
+            if (isNaN(value)) {
+                showMessage('Please enter a valid number for the value.', true);
+                return;
+            }
+            if (!fromUnit || !toUnit) {
+                showMessage('Please select both "From Unit" and "To Unit".', true);
+                return;
+            }
+            if (fromUnit === toUnit) {
+                showMessage(`Result: ${value} ${toUnit.replace(/_/g, ' ')} (same units)`, false);
+                return;
+            }
+
+            const convertedValue = pipeConverter.convert(category, value, fromUnit, toUnit);
+
+            if (convertedValue !== null) {
+                showMessage(`Result: ${value} ${fromUnit.replace(/_/g, ' ')} = ${convertedValue.toFixed(6)} ${toUnit.replace(/_/g, ' ')}`, false);
+            } else {
+                // Error message already logged by PipeDataConvert, just show a generic error
+                showMessage('Conversion failed. Please check your inputs.', true);
+            }
+        }
+
+        // Event Listeners
+        categorySelect.addEventListener('change', populateUnits);
+        convertButton.addEventListener('click', handleConvert);
+
+        // Initial population on page load
+        document.addEventListener('DOMContentLoaded', populateCategories);
+    </script>
+</body>
+</html>
